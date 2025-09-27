@@ -1,0 +1,9 @@
+package com.dootask.backend.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.dootask.backend.entity.WebSocketDialogMessage;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface WebSocketDialogMessageMapper extends BaseMapper<WebSocketDialogMessage> {
+}
