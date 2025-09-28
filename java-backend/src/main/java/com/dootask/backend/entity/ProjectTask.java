@@ -88,6 +88,9 @@ public class ProjectTask {
     @Column(name = "flow_item_color")
     private String flowItemColor;
 
+    @Column(name = "state")
+    private String state = "pending"; // 任务状态: pending, in_progress, completed, cancelled
+
     @TableField(fill = FieldFill.INSERT)
     @Column(name = "created_at")
     private LocalDateTime createdAt;

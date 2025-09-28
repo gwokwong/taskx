@@ -58,7 +58,7 @@ public class CalendarEventController {
 
     @Operation(summary = "删除日历事件")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteEvent(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteEvent(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");
@@ -177,7 +177,7 @@ public class CalendarEventController {
 
     @Operation(summary = "创建任务提醒")
     @PostMapping("/task-reminder")
-    public Result<Void> createTaskReminder(
+    public Result<String> createTaskReminder(
             @RequestParam Long taskId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reminderTime,
             HttpServletRequest request) {
@@ -193,7 +193,7 @@ public class CalendarEventController {
 
     @Operation(summary = "创建项目里程碑")
     @PostMapping("/project-milestone")
-    public Result<Void> createProjectMilestone(
+    public Result<String> createProjectMilestone(
             @RequestParam Long projectId,
             @RequestParam String title,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date,

@@ -1,5 +1,8 @@
 package com.dootask.backend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dootask.backend.entity.User;
 import com.dootask.backend.mapper.UserMapper;
 import com.dootask.backend.service.UserService;
@@ -8,36 +11,42 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
+// Temporarily disabled
+// import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户服务实现类 - 性能优化版本
  */
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class PerformanceOptimizedUserService implements UserService {
+// @Service
+public class PerformanceOptimizedUserService extends ServiceImpl<UserMapper, User> implements UserService {
 
-    private final UserMapper userMapper;
     private final Cache<String, Object> permissionCache;
     private final Cache<String, Object> sessionCache;
+
+    public PerformanceOptimizedUserService(Cache<String, Object> permissionCache, Cache<String, Object> sessionCache) {
+        this.permissionCache = permissionCache;
+        this.sessionCache = sessionCache;
+    }
 
     @Override
     @Cacheable(value = "users", key = "#id")
     public User getUserById(Long id) {
         log.debug("从数据库获取用户信息: {}", id);
-        return userMapper.selectById(id);
+        return baseMapper.selectById(id);
     }
 
-    @Override
     @Cacheable(value = "users", key = "'email:' + #email")
     public User getUserByEmail(String email) {
         log.debug("从数据库获取用户信息: {}", email);
-        return userMapper.selectOne(
-            userMapper.lambdaQuery().eq(User::getEmail, email)
-        );
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @Override
@@ -47,18 +56,17 @@ public class PerformanceOptimizedUserService implements UserService {
 
         if (page != null && size != null) {
             // 使用分页查询
-            return userMapper.selectPage(
-                new Page<>(page, size),
-                userMapper.lambdaQuery().orderByDesc(User::getCreatedAt)
-            ).getRecords();
+            Page<User> pageInfo = new Page<>(page, size);
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.orderByDesc(User::getCreatedAt);
+            return baseMapper.selectPage(pageInfo, queryWrapper).getRecords();
         }
 
-        return userMapper.selectList(
-            userMapper.lambdaQuery().orderByDesc(User::getCreatedAt)
-        );
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByDesc(User::getCreatedAt);
+        return baseMapper.selectList(queryWrapper);
     }
 
-    @Override
     @CacheEvict(value = "users", allEntries = true)
     public User createUser(User user) {
         log.info("创建用户: {}", user.getEmail());
@@ -67,7 +75,7 @@ public class PerformanceOptimizedUserService implements UserService {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
-        userMapper.insert(user);
+        baseMapper.insert(user);
 
         // 清除相关缓存
         clearUserRelatedCache(user.getUserid());
@@ -81,7 +89,7 @@ public class PerformanceOptimizedUserService implements UserService {
         log.info("更新用户: {}", user.getUserid());
 
         user.setUpdatedAt(LocalDateTime.now());
-        userMapper.updateById(user);
+        baseMapper.updateById(user);
 
         // 清除相关缓存
         clearUserRelatedCache(user.getUserid());
@@ -94,7 +102,7 @@ public class PerformanceOptimizedUserService implements UserService {
     public void deleteUser(Long id) {
         log.info("删除用户: {}", id);
 
-        userMapper.deleteById(id);
+        baseMapper.deleteById(id);
 
         // 清除相关缓存
         clearUserRelatedCache(id);
@@ -155,7 +163,7 @@ public class PerformanceOptimizedUserService implements UserService {
 
         // 批量查询未缓存的用户
         if (!uncachedIds.isEmpty()) {
-            List<User> dbUsers = userMapper.selectBatchIds(uncachedIds);
+            List<User> dbUsers = baseMapper.selectBatchIds(uncachedIds);
             for (User user : dbUsers) {
                 permissionCache.put("user:" + user.getUserid(), user);
                 users.add(user);
@@ -173,13 +181,12 @@ public class PerformanceOptimizedUserService implements UserService {
 
         try {
             // 预加载活跃用户
-            List<User> activeUsers = userMapper.selectList(
-                userMapper.lambdaQuery()
-                    .isNull(User::getDisableAt)
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.isNull(User::getDisableAt)
                     .ge(User::getLastAt, LocalDateTime.now().minusDays(7))
                     .orderByDesc(User::getLastAt)
-                    .last("LIMIT 100")
-            );
+                    .last("LIMIT 100");
+            List<User> activeUsers = baseMapper.selectList(queryWrapper);
 
             for (User user : activeUsers) {
                 permissionCache.put("user:" + user.getUserid(), user);
@@ -191,6 +198,115 @@ public class PerformanceOptimizedUserService implements UserService {
         } catch (Exception e) {
             log.error("用户缓存预热失败", e);
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> getUserRegistrationStats(int days) {
+        // 暂时返回空列表，实际项目中需要实现具体的统计逻辑
+        return new java.util.ArrayList<>();
+    }
+
+    @Override
+    public String encodePassword(String rawPassword) {
+        // 使用简单的加密，实际项目中应使用 BCrypt 等安全的加密方式
+        return String.valueOf(rawPassword.hashCode());
+    }
+
+    // 方法签名错误，正确的方法名应该是 login
+    @Override
+    public User login(String email, String password) {
+        // 这里需要实现登录逻辑
+        return null;
+    }
+
+    @Override
+    public User register(String email, String password, String nickname) {
+        // 这里需要实现注册逻辑
+        return null;
+    }
+
+    @Override
+    public String generateToken(User user) {
+        // 这里需要实现令牌生成逻辑
+        return null;
+    }
+
+    @Override
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        // 这里需要实现密码验证逻辑
+        return false;
+    }
+
+    @Override
+    public User userid2basic(Long userid, List<String> addField) {
+        // 这里需要实现用户基本信息获取逻辑
+        return null;
+    }
+
+    @Override
+    public List<User> searchUser(String keyword, Integer limit) {
+        // 这里需要实现用户搜索逻辑
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void changeUserPassword(Long userId, String newPassword) {
+        // 这里需要实现修改密码逻辑
+    }
+
+    @Override
+    public void changeUserStatus(Long userId, String status) {
+        // 这里需要实现修改用户状态逻辑
+    }
+
+    @Override
+    public Map<String, Object> getUserStatistics() {
+        // 这里需要实现用户统计逻辑
+        return new java.util.HashMap<>();
+    }
+
+    @Override
+    public List<User> getUsersByRole(String role) {
+        // 这里需要实现按角色获取用户逻辑
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void assignRole(Long userId, String role) {
+        // 这里需要实现分配角色逻辑
+    }
+
+    @Override
+    public void removeRole(Long userId, String role) {
+        // 这里需要实现移除角色逻辑
+    }
+
+    @Override
+    public List<User> getUsersByDepartment(Long departmentId) {
+        // 这里需要实现按部门获取用户逻辑
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void assignDepartment(Long userId, Long departmentId) {
+        // 这里需要实现分配部门逻辑
+    }
+
+    @Override
+    public void resetUserPassword(Long userId, String defaultPassword) {
+        // 这里需要实现重置密码逻辑
+    }
+
+    @Override
+    public List<User> getActiveUsers() {
+        // 这里需要实现获取活跃用户逻辑
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<String, Long> getUserCountByDepartment() {
+        // 这里需要实现按部门统计用户数量逻辑
+        return new java.util.HashMap<>();
     }
 
     /**

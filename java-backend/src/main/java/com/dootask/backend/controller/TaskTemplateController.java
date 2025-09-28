@@ -61,7 +61,7 @@ public class TaskTemplateController {
 
     @Operation(summary = "删除任务模板")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteTemplate(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteTemplate(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");
@@ -176,7 +176,7 @@ public class TaskTemplateController {
 
     @Operation(summary = "使用模板")
     @PostMapping("/{id}/use")
-    public Result<Void> useTemplate(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> useTemplate(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");
@@ -198,7 +198,7 @@ public class TaskTemplateController {
 
     @Operation(summary = "分享/取消分享模板")
     @PostMapping("/{id}/share")
-    public Result<Void> shareTemplate(@PathVariable Long id, @RequestParam Boolean isPublic, HttpServletRequest request) {
+    public Result<String> shareTemplate(@PathVariable Long id, @RequestParam Boolean isPublic, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");

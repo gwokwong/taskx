@@ -53,7 +53,7 @@ public class NotificationController {
 
     @Operation(summary = "标记通知为已读")
     @PutMapping("/{id}/read")
-    public Result<Void> markAsRead(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> markAsRead(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         notificationService.markAsRead(id, userId);
         return Result.success("标记成功");
@@ -61,7 +61,7 @@ public class NotificationController {
 
     @Operation(summary = "标记所有通知为已读")
     @PutMapping("/read-all")
-    public Result<Void> markAllAsRead(HttpServletRequest request) {
+    public Result<String> markAllAsRead(HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         notificationService.markAllAsRead(userId);
         return Result.success("全部标记成功");
@@ -69,7 +69,7 @@ public class NotificationController {
 
     @Operation(summary = "删除通知")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteNotification(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteNotification(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         notificationService.deleteNotification(id, userId);
         return Result.success("删除成功");

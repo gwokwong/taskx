@@ -31,6 +31,27 @@ export interface Task {
   updatedAt: string
 }
 
+export interface TaskComment {
+  id: number
+  taskId: number
+  userId: number
+  content: string
+  parentId?: number
+  mentions?: number[]
+  attachments?: any[]
+  isDeleted: number
+  createdAt: string
+  updatedAt: string
+  user?: {
+    userid: number
+    nickname: string
+    user_img?: string
+  }
+  replies?: TaskComment[]
+  isLiked?: boolean
+  likeCount?: number
+}
+
 export interface TaskListParams {
   page?: number
   size?: number
@@ -243,7 +264,68 @@ export const taskApi = {
 
   // 移除任务依赖
   removeTaskDependency: (id: number, dependencyId: number) =>
-    api.delete(`/api/tasks/${id}/dependencies/${dependencyId}`)
+    api.delete(`/api/tasks/${id}/dependencies/${dependencyId}`),
+
+  // ===== 任务评论相关API =====
+
+  // 获取任务评论列表
+  getTaskComments: (taskId: number) =>
+    api.get<TaskComment[]>(`/api/tasks/${taskId}/comments`),
+
+  // 添加任务评论
+  addTaskComment: (taskId: number, data: {
+    content: string;
+    parentId?: number;
+    mentions?: number[]
+  }) =>
+    api.post<TaskComment>(`/api/tasks/${taskId}/comments`, data),
+
+  // 更新任务评论
+  updateTaskComment: (taskId: number, commentId: number, data: { content: string }) =>
+    api.put<TaskComment>(`/api/tasks/${taskId}/comments/${commentId}`, data),
+
+  // 删除任务评论
+  deleteTaskComment: (taskId: number, commentId: number) =>
+    api.delete(`/api/tasks/${taskId}/comments/${commentId}`),
+
+  // 获取评论回复
+  getCommentReplies: (taskId: number, commentId: number) =>
+    api.get<TaskComment[]>(`/api/tasks/${taskId}/comments/${commentId}/replies`),
+
+  // 获取任务评论数量
+  getTaskCommentCount: (taskId: number) =>
+    api.get<number>(`/api/tasks/${taskId}/comments/count`),
+
+  // ===== 任务附件相关API =====
+
+  // 获取任务附件列表
+  getTaskAttachments: (taskId: number) =>
+    api.get<any[]>(`/api/tasks/${taskId}/attachments`),
+
+  // 上传任务附件
+  uploadTaskAttachment: (taskId: number, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post(`/api/tasks/${taskId}/attachments`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // 删除任务附件
+  deleteTaskAttachment: (taskId: number, attachmentId: number) =>
+    api.delete(`/api/tasks/${taskId}/attachments/${attachmentId}`),
+
+  // ===== 子任务相关API =====
+
+  // 获取子任务列表
+  getSubTasks: (parentId: number) =>
+    api.get<Task[]>(`/api/tasks/${parentId}/subtasks`),
+
+  // 创建子任务
+  createSubTask: (parentId: number, data: CreateTaskData) =>
+    api.post<Task>(`/api/tasks/${parentId}/subtasks`, data)
 }
 
 export default taskApi

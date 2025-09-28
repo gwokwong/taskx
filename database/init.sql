@@ -200,6 +200,82 @@ CREATE TABLE `task_templates` (
   CONSTRAINT `fk_task_templates_creator` FOREIGN KEY (`creator_id`) REFERENCES `users` (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务模板表';
 
+-- 任务评论表
+CREATE TABLE `task_comments` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+  `task_id` bigint NOT NULL COMMENT '任务ID',
+  `user_id` bigint NOT NULL COMMENT '评论用户ID',
+  `content` text NOT NULL COMMENT '评论内容',
+  `parent_id` bigint DEFAULT NULL COMMENT '父评论ID(用于回复)',
+  `mentions` json DEFAULT NULL COMMENT '提及的用户ID数组',
+  `attachments` json DEFAULT NULL COMMENT '附件数组',
+  `is_deleted` tinyint DEFAULT '0' COMMENT '是否已删除: 0-否, 1-是',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_task_id` (`task_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_parent_id` (`parent_id`),
+  KEY `idx_created_at` (`created_at`),
+  CONSTRAINT `fk_task_comments_task` FOREIGN KEY (`task_id`) REFERENCES `project_tasks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_comments_parent` FOREIGN KEY (`parent_id`) REFERENCES `task_comments` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务评论表';
+
+-- 任务标签表
+CREATE TABLE `task_tags` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '标签ID',
+  `name` varchar(100) NOT NULL COMMENT '标签名称',
+  `color` varchar(10) DEFAULT '#1890ff' COMMENT '标签颜色',
+  `project_id` bigint DEFAULT NULL COMMENT '项目ID(null表示全局标签)',
+  `creator_id` bigint NOT NULL COMMENT '创建者ID',
+  `use_count` int DEFAULT '0' COMMENT '使用次数',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_project_name` (`project_id`, `name`),
+  KEY `idx_project_id` (`project_id`),
+  KEY `idx_creator_id` (`creator_id`),
+  KEY `idx_use_count` (`use_count`),
+  CONSTRAINT `fk_task_tags_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_tags_creator` FOREIGN KEY (`creator_id`) REFERENCES `users` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务标签表';
+
+-- 任务标签关联表
+CREATE TABLE `task_tag_relations` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '关联ID',
+  `task_id` bigint NOT NULL COMMENT '任务ID',
+  `tag_id` bigint NOT NULL COMMENT '标签ID',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_task_tag` (`task_id`, `tag_id`),
+  KEY `idx_task_id` (`task_id`),
+  KEY `idx_tag_id` (`tag_id`),
+  CONSTRAINT `fk_task_tag_relations_task` FOREIGN KEY (`task_id`) REFERENCES `project_tasks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_tag_relations_tag` FOREIGN KEY (`tag_id`) REFERENCES `task_tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务标签关联表';
+
+-- 任务时间记录表
+CREATE TABLE `task_time_logs` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '时间记录ID',
+  `task_id` bigint NOT NULL COMMENT '任务ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `description` varchar(500) DEFAULT NULL COMMENT '工作描述',
+  `duration` int NOT NULL COMMENT '工作时长(分钟)',
+  `start_time` timestamp NULL DEFAULT NULL COMMENT '开始时间',
+  `end_time` timestamp NULL DEFAULT NULL COMMENT '结束时间',
+  `is_billable` tinyint DEFAULT '1' COMMENT '是否计费: 0-否, 1-是',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_task_id` (`task_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_start_time` (`start_time`),
+  KEY `idx_created_at` (`created_at`),
+  CONSTRAINT `fk_task_time_logs_task` FOREIGN KEY (`task_id`) REFERENCES `project_tasks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_task_time_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`userid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='任务时间记录表';
+
 -- =============================================
 -- 日历和事件表
 -- =============================================

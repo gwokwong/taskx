@@ -42,4 +42,16 @@ public interface ProjectMemberService {
     void bulkAddMembers(Long projectId, List<Long> userIds, String role, Long invitedBy);
 
     void bulkRemoveMembers(Long projectId, List<Long> userIds);
+
+    List<Map<String, Object>> getMemberActivities(Long projectId, Long userId);
+
+    void setMemberNotificationSettings(Long projectId, Long userId, Map<String, Object> settings);
+
+    Map<String, Object> getMemberPerformance(Long projectId, Long userId, String period);
+
+    void inviteExternalUsers(Long projectId, List<String> emails, String role, String message, Long invitedBy);
+
+    Map<String, Object> getMemberPermissions(Long projectId, Long userId);
+
+    Map<String, Object> generateMemberReport(Long projectId, String format, String period);
 }

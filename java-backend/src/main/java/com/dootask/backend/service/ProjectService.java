@@ -22,4 +22,6 @@ public interface ProjectService extends IService<Project> {
     void archiveProject(Long projectId, Long userId);
 
     void updateProjectStats(Long projectId);
+
+    List<Project> getAllProjects(Integer page, Integer size);
 }

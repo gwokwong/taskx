@@ -20,6 +20,8 @@ public interface UserService extends IService<User> {
 
     boolean validatePassword(String rawPassword, String encodedPassword);
 
+    String encodePassword(String rawPassword);
+
     User userid2basic(Long userid, List<String> addField);
 
     List<User> searchUser(String keyword, Integer limit);

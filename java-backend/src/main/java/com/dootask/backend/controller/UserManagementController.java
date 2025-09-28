@@ -67,7 +67,7 @@ public class UserManagementController {
 
     @Operation(summary = "删除用户(管理员)")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteUser(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteUser(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null || !userService.isAdmin(userId)) {
             return Result.error("无权限访问");
@@ -79,7 +79,7 @@ public class UserManagementController {
 
     @Operation(summary = "重置用户密码(管理员)")
     @PostMapping("/{id}/reset-password")
-    public Result<Void> resetPassword(
+    public Result<String> resetPassword(
             @PathVariable Long id,
             @RequestParam(defaultValue = "123456") String defaultPassword,
             HttpServletRequest request) {
@@ -95,7 +95,7 @@ public class UserManagementController {
 
     @Operation(summary = "修改用户状态(管理员)")
     @PostMapping("/{id}/status")
-    public Result<Void> changeUserStatus(
+    public Result<String> changeUserStatus(
             @PathVariable Long id,
             @RequestParam String status,
             HttpServletRequest request) {
@@ -111,7 +111,7 @@ public class UserManagementController {
 
     @Operation(summary = "分配角色(管理员)")
     @PostMapping("/{id}/assign-role")
-    public Result<Void> assignRole(
+    public Result<String> assignRole(
             @PathVariable Long id,
             @RequestParam String role,
             HttpServletRequest request) {
@@ -127,7 +127,7 @@ public class UserManagementController {
 
     @Operation(summary = "移除角色(管理员)")
     @PostMapping("/{id}/remove-role")
-    public Result<Void> removeRole(
+    public Result<String> removeRole(
             @PathVariable Long id,
             @RequestParam String role,
             HttpServletRequest request) {
@@ -143,7 +143,7 @@ public class UserManagementController {
 
     @Operation(summary = "分配部门(管理员)")
     @PostMapping("/{id}/assign-department")
-    public Result<Void> assignDepartment(
+    public Result<String> assignDepartment(
             @PathVariable Long id,
             @RequestParam Long departmentId,
             HttpServletRequest request) {

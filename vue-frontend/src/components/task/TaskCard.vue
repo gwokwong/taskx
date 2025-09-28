@@ -58,13 +58,13 @@
       </div>
 
       <!-- 附件数量 -->
-      <div v-if="task.attachments_count > 0" class="attachments">
+      <div v-if="(task.attachments_count ?? 0) > 0" class="attachments">
         <Paperclip class="w-3 h-3" />
         <span>{{ task.attachments_count }}</span>
       </div>
 
       <!-- 评论数量 -->
-      <div v-if="task.comments_count > 0" class="comments">
+      <div v-if="(task.comments_count ?? 0) > 0" class="comments">
         <MessageCircle class="w-3 h-3" />
         <span>{{ task.comments_count }}</span>
       </div>
@@ -182,7 +182,7 @@ const hasSubtasks = computed(() => {
 })
 
 const subtaskProgress = computed(() => {
-  if (!hasSubtasks.value) return 0
+  if (!hasSubtasks.value || !props.task.subtasks) return 0
   return Math.round(((props.task.subtasks_complete || 0) / props.task.subtasks) * 100)
 })
 

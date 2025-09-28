@@ -3,7 +3,8 @@ package com.dootask.backend.config;
 import com.dootask.backend.service.SystemLogService;
 import com.dootask.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+// Temporarily disabled
+// import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+// @Component
 @RequiredArgsConstructor
 public class LoggingInterceptor implements HandlerInterceptor {
 

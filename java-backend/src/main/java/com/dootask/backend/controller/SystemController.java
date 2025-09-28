@@ -60,7 +60,7 @@ public class SystemController {
 
     @Operation(summary = "更新系统设置(管理员)")
     @PutMapping("/settings")
-    public Result<Void> updateSystemSettings(@RequestBody Map<String, String> settings,
+    public Result<String> updateSystemSettings(@RequestBody Map<String, String> settings,
                                             HttpServletRequest request) {
 
         // TODO: 验证管理员权限
@@ -75,7 +75,7 @@ public class SystemController {
 
     @Operation(summary = "更新单个系统设置(管理员)")
     @PutMapping("/settings/{key}")
-    public Result<Void> updateSystemSetting(@PathVariable String key,
+    public Result<String> updateSystemSetting(@PathVariable String key,
                                            @RequestBody Map<String, String> data,
                                            HttpServletRequest request) {
 

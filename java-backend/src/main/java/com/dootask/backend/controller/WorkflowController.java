@@ -62,7 +62,7 @@ public class WorkflowController {
 
     @Operation(summary = "删除工作流")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteWorkflow(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteWorkflow(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");
@@ -266,7 +266,7 @@ public class WorkflowController {
 
     @Operation(summary = "完成工作流")
     @PostMapping("/instances/{id}/complete")
-    public Result<Void> completeWorkflow(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> completeWorkflow(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");
@@ -288,7 +288,7 @@ public class WorkflowController {
 
     @Operation(summary = "取消工作流")
     @PostMapping("/instances/{id}/cancel")
-    public Result<Void> cancelWorkflow(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> cancelWorkflow(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null) {
             return Result.error("未授权访问");

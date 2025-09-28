@@ -94,7 +94,7 @@ public class SystemLogController {
 
     @Operation(summary = "清理旧日志(管理员)")
     @DeleteMapping("/cleanup")
-    public Result<Void> cleanOldLogs(
+    public Result<String> cleanOldLogs(
             @RequestParam(defaultValue = "90") Integer daysToKeep,
             HttpServletRequest request) {
 

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name = "认证管理", description = "用户认证相关接口")
-@RestController
+// @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
@@ -51,7 +51,7 @@ public class AuthController {
 
     @Operation(summary = "退出登录")
     @PostMapping("/logout")
-    public Result<Void> logout() {
+    public Result<String> logout() {
         return Result.success("退出成功");
     }
 

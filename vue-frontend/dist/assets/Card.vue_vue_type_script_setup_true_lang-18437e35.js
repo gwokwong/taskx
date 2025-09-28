@@ -1,0 +1,1 @@
+import{c as a}from"./Button.vue_vue_type_script_setup_true_lang-3c3830a0.js";import{d as o,q as n,b as t,ag as c,u as d,e as l}from"./vendor-84c58009.js";const f=o({__name:"Card",props:{class:{}},setup(s){const e=s;return(r,m)=>(l(),n("div",{class:c(d(a)("rounded-lg border bg-card text-card-foreground shadow-sm",e.class))},[t(r.$slots,"default")],2))}});export{f as _};

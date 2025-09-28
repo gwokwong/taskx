@@ -118,7 +118,7 @@ public class MonitoringAspect {
     public Object monitorCacheableMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
 
-        Timer.Sample sample = Timer.start();
+        Timer.Sample sample = applicationMetrics.startRequestTimer();
 
         try {
             Object result = joinPoint.proceed();
@@ -129,10 +129,7 @@ public class MonitoringAspect {
             throw e;
         } finally {
             // 记录缓存操作时间
-            Timer.builder("dootask.cache.operation.duration")
-                    .description("Cache operation duration")
-                    .tag("method", methodName)
-                    .register(sample.stop());
+            applicationMetrics.stopRequestTimer(sample);
         }
     }
 }

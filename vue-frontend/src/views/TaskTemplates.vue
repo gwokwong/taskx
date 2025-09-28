@@ -58,36 +58,36 @@
                 </div>
                 <div class="flex items-center space-x-2">
                   <Badge v-if="template.isPublic" variant="secondary">公开</Badge>
-                  <Dropdown>
-                    <DropdownTrigger as-child>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
                       <Button variant="ghost" size="sm" @click.stop>
                         <MoreVertical class="w-4 h-4" />
                       </Button>
-                    </DropdownTrigger>
-                    <DropdownContent>
-                      <DropdownItem @click="useTemplate(template)">
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem @click="useTemplate(template)">
                         <Play class="w-4 h-4 mr-2" />
                         使用模板
-                      </DropdownItem>
-                      <DropdownItem @click="duplicateTemplate(template)">
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click="duplicateTemplate(template)">
                         <Copy class="w-4 h-4 mr-2" />
                         复制模板
-                      </DropdownItem>
-                      <DropdownItem v-if="canEdit(template)" @click="editTemplate(template)">
+                      </DropdownMenuItem>
+                      <DropdownMenuItem v-if="canEdit(template)" @click="editTemplate(template)">
                         <Edit class="w-4 h-4 mr-2" />
                         编辑模板
-                      </DropdownItem>
-                      <DropdownItem v-if="canEdit(template)" @click="shareTemplate(template)">
+                      </DropdownMenuItem>
+                      <DropdownMenuItem v-if="canEdit(template)" @click="shareTemplate(template)">
                         <Share class="w-4 h-4 mr-2" />
                         {{ template.isPublic ? '取消分享' : '分享模板' }}
-                      </DropdownItem>
+                      </DropdownMenuItem>
                       <DropdownSeparator v-if="canEdit(template)" />
-                      <DropdownItem v-if="canEdit(template)" class="text-red-600" @click="deleteTemplate(template)">
+                      <DropdownMenuItem v-if="canEdit(template)" class="text-red-600" @click="deleteTemplate(template)">
                         <Trash class="w-4 h-4 mr-2" />
                         删除模板
-                      </DropdownItem>
-                    </DropdownContent>
-                  </Dropdown>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -243,7 +243,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Dropdown, DropdownContent, DropdownItem, DropdownSeparator, DropdownTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { taskTemplateApi, type TaskTemplate } from '@/api/taskTemplate'
 import { useAuthStore } from '@/stores/auth'
 

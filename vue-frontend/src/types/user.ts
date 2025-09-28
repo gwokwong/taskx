@@ -23,4 +23,5 @@ export interface User {
   updatedAt: string
   online?: boolean
   departmentName?: string
+  role?: string
 }

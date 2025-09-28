@@ -49,7 +49,7 @@ public class DepartmentController {
 
     @Operation(summary = "删除部门")
     @DeleteMapping("/{id}")
-    public Result<Void> deleteDepartment(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteDepartment(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         if (userId == null || !userService.isAdmin(userId)) {
             return Result.error("无权限访问");
@@ -125,7 +125,7 @@ public class DepartmentController {
 
     @Operation(summary = "移动部门")
     @PostMapping("/{id}/move")
-    public Result<Void> moveDepartment(
+    public Result<String> moveDepartment(
             @PathVariable Long id,
             @RequestParam Long newParentId,
             HttpServletRequest request) {
@@ -141,7 +141,7 @@ public class DepartmentController {
 
     @Operation(summary = "分配部门经理")
     @PostMapping("/{id}/assign-manager")
-    public Result<Void> assignManager(
+    public Result<String> assignManager(
             @PathVariable Long id,
             @RequestParam Long managerId,
             HttpServletRequest request) {

@@ -135,7 +135,11 @@ const getActionPosition = (index: number) => {
 const handleClick = () => {
   if (props.actions.length > 0) {
     isExpanded.value = !isExpanded.value
-    emit(isExpanded.value ? 'expand' : 'collapse')
+    if (isExpanded.value) {
+      emit('expand')
+    } else {
+      emit('collapse')
+    }
   } else {
     emit('click')
   }

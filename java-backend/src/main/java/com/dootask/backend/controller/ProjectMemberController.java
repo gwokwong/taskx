@@ -47,7 +47,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "移除项目成员")
     @DeleteMapping("/{userId}")
-    public Result<Void> removeMember(
+    public Result<String> removeMember(
             @PathVariable Long projectId,
             @PathVariable Long userId,
             HttpServletRequest request) {
@@ -70,7 +70,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "更新成员角色")
     @PutMapping("/{userId}/role")
-    public Result<Void> updateMemberRole(
+    public Result<String> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long userId,
             @RequestParam String role,
@@ -93,7 +93,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "更新成员权限")
     @PutMapping("/{userId}/permissions")
-    public Result<Void> updateMemberPermissions(
+    public Result<String> updateMemberPermissions(
             @PathVariable Long projectId,
             @PathVariable Long userId,
             @RequestBody String permissions,
@@ -177,7 +177,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "转移项目所有权")
     @PostMapping("/transfer-ownership")
-    public Result<Void> transferOwnership(
+    public Result<String> transferOwnership(
             @PathVariable Long projectId,
             @RequestParam Long newOwnerId,
             HttpServletRequest request) {
@@ -199,7 +199,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "批量添加成员")
     @PostMapping("/bulk-add")
-    public Result<Void> bulkAddMembers(
+    public Result<String> bulkAddMembers(
             @PathVariable Long projectId,
             @RequestBody Map<String, Object> request,
             HttpServletRequest httpRequest) {
@@ -225,7 +225,7 @@ public class ProjectMemberController {
 
     @Operation(summary = "批量移除成员")
     @PostMapping("/bulk-remove")
-    public Result<Void> bulkRemoveMembers(
+    public Result<String> bulkRemoveMembers(
             @PathVariable Long projectId,
             @RequestBody Map<String, Object> request,
             HttpServletRequest httpRequest) {
@@ -246,6 +246,135 @@ public class ProjectMemberController {
 
         projectMemberService.bulkRemoveMembers(projectId, userIds);
         return Result.success("批量移除成功");
+    }
+
+    @Operation(summary = "获取成员活动日志")
+    @GetMapping("/{userId}/activities")
+    public Result<List<Map<String, Object>>> getMemberActivities(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            HttpServletRequest request) {
+
+        Long currentUserId = getCurrentUserId(request);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!projectMemberService.isMember(projectId, currentUserId)) {
+            return Result.error("无权限查看活动日志");
+        }
+
+        List<Map<String, Object>> activities = projectMemberService.getMemberActivities(projectId, userId);
+        return Result.success(activities);
+    }
+
+    @Operation(summary = "设置成员通知设置")
+    @PostMapping("/{userId}/notification-settings")
+    public Result<String> setMemberNotificationSettings(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            @RequestBody Map<String, Object> settings,
+            HttpServletRequest request) {
+
+        Long currentUserId = getCurrentUserId(request);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!currentUserId.equals(userId) && !projectMemberService.hasPermission(projectId, currentUserId, "manage_members")) {
+            return Result.error("无权限设置通知");
+        }
+
+        projectMemberService.setMemberNotificationSettings(projectId, userId, settings);
+        return Result.success("通知设置成功");
+    }
+
+    @Operation(summary = "获取成员绩效统计")
+    @GetMapping("/{userId}/performance")
+    public Result<Map<String, Object>> getMemberPerformance(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            @RequestParam(required = false) String period,
+            HttpServletRequest request) {
+
+        Long currentUserId = getCurrentUserId(request);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!projectMemberService.hasPermission(projectId, currentUserId, "view_performance") &&
+            !currentUserId.equals(userId)) {
+            return Result.error("无权限查看绩效");
+        }
+
+        Map<String, Object> performance = projectMemberService.getMemberPerformance(projectId, userId, period != null ? period : "month");
+        return Result.success(performance);
+    }
+
+    @Operation(summary = "邀请外部用户加入项目")
+    @PostMapping("/invite-external")
+    public Result<String> inviteExternalUsers(
+            @PathVariable Long projectId,
+            @RequestBody Map<String, Object> request,
+            HttpServletRequest httpRequest) {
+
+        Long currentUserId = getCurrentUserId(httpRequest);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!projectMemberService.hasPermission(projectId, currentUserId, "manage_members")) {
+            return Result.error("无权限邀请成员");
+        }
+
+        @SuppressWarnings("unchecked")
+        List<String> emails = (List<String>) request.get("emails");
+        String role = (String) request.getOrDefault("role", "member");
+        String message = (String) request.get("message");
+
+        projectMemberService.inviteExternalUsers(projectId, emails, role, message, currentUserId);
+        return Result.success("邀请已发送");
+    }
+
+    @Operation(summary = "获取成员权限详情")
+    @GetMapping("/{userId}/permissions")
+    public Result<Map<String, Object>> getMemberPermissions(
+            @PathVariable Long projectId,
+            @PathVariable Long userId,
+            HttpServletRequest request) {
+
+        Long currentUserId = getCurrentUserId(request);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!projectMemberService.isMember(projectId, currentUserId)) {
+            return Result.error("无权限查看权限");
+        }
+
+        Map<String, Object> permissions = projectMemberService.getMemberPermissions(projectId, userId);
+        return Result.success(permissions);
+    }
+
+    @Operation(summary = "生成成员报告")
+    @GetMapping("/report")
+    public Result<Map<String, Object>> generateMemberReport(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String format,
+            @RequestParam(required = false) String period,
+            HttpServletRequest request) {
+
+        Long currentUserId = getCurrentUserId(request);
+        if (currentUserId == null) {
+            return Result.error("未授权访问");
+        }
+
+        if (!projectMemberService.hasPermission(projectId, currentUserId, "view_reports")) {
+            return Result.error("无权限生成报告");
+        }
+
+        Map<String, Object> report = projectMemberService.generateMemberReport(projectId, format != null ? format : "json", period != null ? period : "month");
+        return Result.success(report);
     }
 
     private Long getCurrentUserId(HttpServletRequest request) {

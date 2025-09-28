@@ -59,7 +59,7 @@ public class UserSettingController {
 
     @Operation(summary = "更新用户设置")
     @PutMapping
-    public Result<Void> updateUserSettings(@RequestBody Map<String, String> settings,
+    public Result<String> updateUserSettings(@RequestBody Map<String, String> settings,
                                           HttpServletRequest request) {
 
         Long userId = getCurrentUserId(request);
@@ -73,7 +73,7 @@ public class UserSettingController {
 
     @Operation(summary = "更新单个用户设置")
     @PutMapping("/{key}")
-    public Result<Void> updateUserSetting(@PathVariable String key,
+    public Result<String> updateUserSetting(@PathVariable String key,
                                          @RequestBody Map<String, String> data,
                                          HttpServletRequest request) {
 
@@ -89,7 +89,7 @@ public class UserSettingController {
 
     @Operation(summary = "初始化用户默认设置")
     @PostMapping("/initialize")
-    public Result<Void> initializeUserSettings(HttpServletRequest request) {
+    public Result<String> initializeUserSettings(HttpServletRequest request) {
 
         Long userId = getCurrentUserId(request);
         if (userId == null) {

@@ -121,7 +121,7 @@ class DialogController {
 
     @Operation(summary = "标记消息为已读")
     @PutMapping("/{dialogId}/read")
-    public Result<Void> markAsRead(@PathVariable Long dialogId, HttpServletRequest request) {
+    public Result<String> markAsRead(@PathVariable Long dialogId, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         messageService.markMessagesAsRead(dialogId, userId);
         return Result.success("标记成功");

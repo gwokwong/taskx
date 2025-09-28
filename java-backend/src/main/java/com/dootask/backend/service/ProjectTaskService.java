@@ -41,4 +41,14 @@ public interface ProjectTaskService extends IService<ProjectTask> {
      * 更新任务进度
      */
     void updateTaskProgress(Long taskId, Integer progress);
+
+    /**
+     * 获取项目任务
+     */
+    List<ProjectTask> getProjectTasks(Long projectId);
+
+    /**
+     * 获取所有任务
+     */
+    List<ProjectTask> getAllTasks(Integer page, Integer size);
 }

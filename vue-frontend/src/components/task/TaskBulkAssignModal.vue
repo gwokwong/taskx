@@ -86,7 +86,7 @@
             </div>
             <div class="selected-list">
               <div
-                v-for="user in selectedUsers"
+                v-for="user in selectedUserObjects"
                 :key="user.id"
                 class="selected-user"
               >
@@ -194,10 +194,23 @@ import AvatarGroup from '@/components/ui/AvatarGroup.vue'
 
 import { taskApi } from '@/api'
 
+interface TaskAssignment {
+  taskId: number
+  taskName: string
+  assignees: User[]
+}
+
+interface User {
+  id: number
+  nickname: string
+  email?: string
+  department?: string
+}
+
 interface TaskBulkAssignModalProps {
   open: boolean
   taskIds: number[]
-  users: any[]
+  users: User[]
 }
 
 const props = defineProps<TaskBulkAssignModalProps>()
@@ -213,9 +226,9 @@ const { toast } = useToast()
 // 状态
 const isAssigning = ref(false)
 const assignAction = ref('replace') // replace, add, remove
-const selectedUsers = ref([])
+const selectedUsers = ref<number[]>([])
 const searchQuery = ref('')
-const currentAssignments = ref([])
+const currentAssignments = ref<TaskAssignment[]>([])
 
 // 计算属性
 const filteredUsers = computed(() => {
@@ -229,22 +242,26 @@ const filteredUsers = computed(() => {
   )
 })
 
+const selectedUserObjects = computed(() => {
+  return props.users.filter(user => selectedUsers.value.includes(user.id))
+})
+
 // 方法
-const isUserSelected = (user: any): boolean => {
-  return selectedUsers.value.some(u => u.id === user.id)
+const isUserSelected = (user: User): boolean => {
+  return selectedUsers.value.includes(user.id)
 }
 
-const toggleUser = (user: any) => {
-  const index = selectedUsers.value.findIndex(u => u.id === user.id)
+const toggleUser = (user: User) => {
+  const index = selectedUsers.value.indexOf(user.id)
   if (index > -1) {
     selectedUsers.value.splice(index, 1)
   } else {
-    selectedUsers.value.push(user)
+    selectedUsers.value.push(user.id)
   }
 }
 
-const removeUser = (user: any) => {
-  const index = selectedUsers.value.findIndex(u => u.id === user.id)
+const removeUser = (user: User) => {
+  const index = selectedUsers.value.indexOf(user.id)
   if (index > -1) {
     selectedUsers.value.splice(index, 1)
   }
@@ -269,7 +286,7 @@ const getAssignButtonText = (): string => {
 
 const loadCurrentAssignments = async () => {
   try {
-    const assignments = []
+    const assignments: TaskAssignment[] = []
 
     for (const taskId of props.taskIds.slice(0, 5)) { // 只显示前5个任务的分配情况
       const task = await taskApi.getTask(taskId)
@@ -289,7 +306,7 @@ const loadCurrentAssignments = async () => {
   }
 }
 
-const getTaskAssignees = (task: any): any[] => {
+const getTaskAssignees = (task: any): User[] => {
   if (!task.owner || !props.users) return []
 
   try {
@@ -308,7 +325,7 @@ const handleAssign = async () => {
   isAssigning.value = true
 
   try {
-    const userIds = selectedUsers.value.map(user => user.id)
+    const userIds = selectedUsers.value // selectedUsers is already number[]
 
     // 根据操作类型调用不同的API
     switch (assignAction.value) {
@@ -333,10 +350,10 @@ const handleAssign = async () => {
         users: selectedUsers.value.length
       })
     })
-  } catch (error) {
+  } catch (error: unknown) {
     toast({
       title: t('error.assignFailed'),
-      description: error.message,
+      description: error instanceof Error ? error.message : 'Unknown error',
       variant: 'destructive'
     })
   } finally {

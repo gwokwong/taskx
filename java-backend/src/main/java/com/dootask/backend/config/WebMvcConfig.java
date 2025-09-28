@@ -1,16 +1,19 @@
 package com.dootask.backend.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Configuration;
+// Temporarily disabled
+// import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+// @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private final LoggingInterceptor loggingInterceptor;
+    // Temporarily disabled
+    // private final LoggingInterceptor loggingInterceptor;
 
+    /*
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loggingInterceptor)
@@ -21,4 +24,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/system/settings/public"
                 );
     }
+    */
 }

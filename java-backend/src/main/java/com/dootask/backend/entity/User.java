@@ -80,6 +80,9 @@ public class User {
 
     private String lang = "zh-CN";
 
+    @Column(name = "role")
+    private String role = "user"; // user, admin, manager
+
     @TableField(fill = FieldFill.INSERT)
     @Column(name = "created_at")
     private LocalDateTime createdAt;

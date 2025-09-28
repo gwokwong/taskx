@@ -63,31 +63,33 @@ public class ApplicationMetrics {
                 .register(meterRegistry);
 
         // 注册仪表盘
-        Gauge.builder("dootask.users.active")
+        Gauge.builder("dootask.users.active", activeUsers, AtomicInteger::get)
                 .description("Number of active users")
-                .register(meterRegistry, activeUsers, AtomicInteger::get);
+                .register(meterRegistry);
 
-        Gauge.builder("dootask.sessions.active")
+        Gauge.builder("dootask.sessions.active", activeSessions, AtomicInteger::get)
                 .description("Number of active sessions")
-                .register(meterRegistry, activeSessions, AtomicInteger::get);
+                .register(meterRegistry);
 
-        Gauge.builder("dootask.queue.size")
+        Gauge.builder("dootask.queue.size", queueSize, AtomicInteger::get)
                 .description("Size of processing queue")
-                .register(meterRegistry, queueSize, AtomicInteger::get);
+                .register(meterRegistry);
 
         // JVM 指标
-        Gauge.builder("dootask.jvm.memory.used")
+        Gauge.builder("dootask.jvm.memory.used", Runtime.getRuntime(),
+                runtime -> (double) (runtime.totalMemory() - runtime.freeMemory()))
                 .description("JVM memory used")
-                .register(meterRegistry, Runtime.getRuntime(),
-                    runtime -> runtime.totalMemory() - runtime.freeMemory());
+                .register(meterRegistry);
 
-        Gauge.builder("dootask.jvm.memory.free")
+        Gauge.builder("dootask.jvm.memory.free", Runtime.getRuntime(),
+                runtime -> (double) runtime.freeMemory())
                 .description("JVM memory free")
-                .register(meterRegistry, Runtime.getRuntime(), Runtime::freeMemory);
+                .register(meterRegistry);
 
-        Gauge.builder("dootask.jvm.memory.max")
+        Gauge.builder("dootask.jvm.memory.max", Runtime.getRuntime(),
+                runtime -> (double) runtime.maxMemory())
                 .description("JVM memory max")
-                .register(meterRegistry, Runtime.getRuntime(), Runtime::maxMemory);
+                .register(meterRegistry);
 
         log.info("应用监控指标初始化完成");
     }
@@ -205,9 +207,9 @@ public class ApplicationMetrics {
      * 记录自定义指标
      */
     public void recordCustomMetric(String name, double value) {
-        Gauge.builder("dootask.custom." + name)
+        Gauge.builder("dootask.custom." + name, () -> value)
                 .description("Custom metric: " + name)
-                .register(meterRegistry, () -> value);
+                .register(meterRegistry);
     }
 
     /**

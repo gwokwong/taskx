@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +27,7 @@ public class CacheConfig {
         cacheManager.setCaffeine(caffeineCacheBuilder());
 
         // 预定义缓存
-        cacheManager.setCacheNames(
+        cacheManager.setCacheNames(Arrays.asList(
             "users",           // 用户缓存
             "projects",        // 项目缓存
             "tasks",           // 任务缓存
@@ -35,7 +36,7 @@ public class CacheConfig {
             "settings",        // 系统设置缓存
             "search",          // 搜索结果缓存
             "statistics"       // 统计数据缓存
-        );
+        ));
 
         return cacheManager;
     }

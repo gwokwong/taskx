@@ -18,4 +18,6 @@ public interface NotificationService extends IService<Notification> {
     Long getUnreadCount(Long userId);
 
     void deleteNotification(Long notificationId, Long userId);
+
+    void sendNotification(Long userId, String title, String message);
 }
